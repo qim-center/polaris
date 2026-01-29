@@ -1,37 +1,71 @@
+import numpy as np
 import gradio as gr
+from pipeline import PolarisPipeline
+from pathlib import Path
 
 # -----------------------------
 # Placeholder backend functions
 # -----------------------------
 
-def preview_reconstruction(data_folder, use_paganin, delta, beta, distance):
-    """
-    Placeholder function that mimics a quick reconstruction preview.
-    Returns a single 2D slice (middle slice).
-    """
-    # In the real implementation:
-    # - load projection data from data_folder
-    # - optionally apply Paganin phase retrieval
-    # - run a lightweight reconstruction
-    # - return the middle slice as a numpy array
-    import numpy as np
+def polaris_data_loader(data_path):
+
+    path = Path(data_path)
+
+    if path.suffix == ".scanlist":
+        data_directory = path.parent
+
+    elif path.is_dir():
+        data_directory = path
+
+    else:
+        raise ValueError("Invalid path: expected a .scanlist file or a directory")
+
+    # for now, we mock updata
+    data = np.random.rand(10, 256, 256)
+
+    return data
+
+def load_data(scanlist_path, preview):
+
+    data = polaris_data_loader(scanlist_path)
     
-    # Dummy image for now
-    img = np.random.rand(256, 256)
-    return img
+    if preview:
+        # Here we get only the middle slice
+        data = data[0]
+
+    return data
 
 
-def run_full_reconstruction(data_folder, use_paganin, delta, beta, distance):
+
+def run_reconstruction(scanlist_path, use_paganin, delta, beta, energy, preview):
     """
     Placeholder function that mimics a full reconstruction run.
     """
-    # In the real implementation:
-    # - load data
-    # - apply full preprocessing
-    # - run full reconstruction
-    # - save results to disk
-    return f"Reconstruction completed for data in: {data_folder}"
 
+    data = load_data(scanlist_path, preview=preview)
+    print (data.shape)
+
+    # Run pipeline
+    pipeline = PolarisPipeline(data, delta, beta, energy)
+    pipeline.get_sinogram()
+    pipeline.correct_rotation()
+    pipeline.ring_correction()
+    if use_paganin:
+        pipeline.paganin()
+    pipeline.reconstruct()
+
+    return pipeline.reconstructed
+
+def run_preview(*args):
+    data = run_reconstruction(*args, preview=True)
+
+    return data
+
+def run_full(*args):
+    run_reconstruction(*args, preview=False)
+
+    path = args[0]
+    print (f"Full reconstruction from {path}")
 
 # -----------------------------
 # Gradio GUI
@@ -42,11 +76,15 @@ with gr.Blocks(title="Phase-Contrast Tomography Reconstruction") as polaris_gui:
                 "This interface provides a simplified workflow for running a phase-contrast tomographic reconstruction."
                 )
 
+    preview = gr.Checkbox(
+                value=True,
+                visible=False,
+            )
     with gr.Row():
         with gr.Column(scale=1):
             gr.Markdown("### Input Data")
-            data_folder = gr.FileExplorer(
-                label="Select projection data folder",
+            scanlist_path = gr.FileExplorer(
+                label="Select the scanlist file.",
                 file_count="single"
             )
 
@@ -66,9 +104,9 @@ with gr.Blocks(title="Phase-Contrast Tomography Reconstruction") as polaris_gui:
                 label="Beta",
                 precision=9
             )
-            distance = gr.Number(
-                value=0.1,
-                label="Propagation distance (m)"
+            energy = gr.Number(
+                value=10000,
+                label="Energy"
             )
 
             preview_button = gr.Button("Preview middle slice")
@@ -91,14 +129,14 @@ with gr.Blocks(title="Phase-Contrast Tomography Reconstruction") as polaris_gui:
     # -----------------------------
 
     preview_button.click(
-        fn=preview_reconstruction,
-        inputs=[data_folder, use_paganin, delta, beta, distance],
+        fn=run_preview,
+        inputs=[scanlist_path, use_paganin, delta, beta, energy],
         outputs=preview_image
     )
 
     run_button.click(
-        fn=run_full_reconstruction,
-        inputs=[data_folder, use_paganin, delta, beta, distance],
+        fn=run_full,
+        inputs=[scanlist_path, use_paganin, delta, beta, energy],
         outputs=status_text
     )
 

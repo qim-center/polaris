@@ -60,7 +60,18 @@ def run_reconstruction(scanlist_path, use_paganin, delta, beta, energy, preview)
         pipeline.paganin()
     pipeline.reconstruct()
 
-    return pipeline.reconstructed
+    image = pipeline.reconstructed.array
+
+    # Returning just middle slice for viz
+    if image.ndim == 3:
+        middle_slice = image[image.shape[0] // 2]
+    elif image.ndim == 2:
+        middle_slice = image
+    else:
+        raise ValueError(f"Unsupported number of dimensions: {image.ndim}")
+
+
+    return middle_slice
 
 def run_preview(*args):
     data = run_reconstruction(*args, preview=True)

@@ -54,10 +54,10 @@ def run_reconstruction(scanlist_path, use_paganin, delta, beta, energy, preview)
     # Run pipeline
     pipeline = PolarisPipeline(data, delta, beta, energy)
     pipeline.get_sinogram()
-    pipeline.correct_rotation()
-    pipeline.ring_correction()
-    if use_paganin:
-        pipeline.paganin()
+    # pipeline.correct_rotation()
+    # pipeline.ring_correction()
+    # if use_paganin:
+    #     pipeline.paganin()
     pipeline.reconstruct()
 
     return pipeline.reconstructed

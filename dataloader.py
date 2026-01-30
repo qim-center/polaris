@@ -22,12 +22,11 @@ class PolarisDataReader(object):
         
 
     def set_up(self, folder_name=None):
-        print("folder name:", folder_name)
-        with open(os.path.join(folder_name,'/02-tomo/scan_information.json'), 'r') as f:
+        with open(os.path.join(folder_name,'02-tomo/scan_information.json'), 'r') as f:
           scan_information = json.load(f)
-        with open(os.path.join(folder_name,'/02-tomo/Input/command.json'), 'r') as f:
+        with open(os.path.join(folder_name,'02-tomo/Input/command.json'), 'r') as f:
           tomo_command = json.load(f)
-        with open(os.path.join(folder_name,'/01-ff/Input/command.json'), 'r') as f:
+        with open(os.path.join(folder_name,'01-ff/Input/command.json'), 'r') as f:
           flat_command = json.load(f)
         
         # Parsing of parameters from file

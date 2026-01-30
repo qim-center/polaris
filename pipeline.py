@@ -27,12 +27,14 @@ class PolarisPipeline:
         self.ag = self.data.geometry
         self.sinogram = AcquisitionData(self.data, geometry=self.ag)
         self.ig = self.ag.get_ImageGeometry()
+        print(self.data.shape)
 
         # Optional voxel size overrides (kept for reference)
         # self.ig.voxel_size_x = voxel_size_mm
         # self.ig.voxel_size_y = voxel_size_mm
 
         self.sinogram = TransmissionAbsorptionConverter()(self.sinogram)
+        print("TransmissionAbsorptionConverter done")
         
 
     def correct_rotation(self):
@@ -43,20 +45,24 @@ class PolarisPipeline:
 
         processor = CentreOfRotationCorrector.image_sharpness(
             "centre",
-            backend="tigre"
+            backend="tigre",
+            tolerance=0.1,
         )
         processor.set_input(self.sinogram)
         self.sinogram = processor.get_output()
+        print("Centre of Rotation correction done")
 
     def ring_correction(self):
         ringRemove = RingRemover()
         ringRemove.set_input(self.sinogram)
         self.sino_rings = ringRemove.get_output()
+        print("ring removal done")
 
     def paganin(self):
         paganin_processor = PaganinProcessor(delta = self.delta, beta = self.beta, energy = self.energy, full_retrieval= False)
         paganin_processor.set_input(self.sino_rings)
         self.sino_pag = paganin_processor.get_output()
+        print("paganin done")
 
     def reconstruct(self):
         if self.sino_pag is not None:

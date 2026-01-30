@@ -26,7 +26,7 @@ def polaris_data_loader(data_path):
         'vertical': -1,
         'horizontal': -1,
         }
-    
+    print(data_directory)
     data = PolarisDataReader(data_directory, roi).read()
 
     return data

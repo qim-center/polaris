@@ -43,12 +43,11 @@ class PolarisPipeline:
 
         self.sinogram.reorder(order="tigre")
 
-        # processor = CentreOfRotationCorrector.image_sharpness(
-        #     "centre",
-        #     backend="tigre",
-        #     tolerance=0.1,
-        # )
-        processor = CentreOfRotationCorrector.xcorrelation(ang_tol=10)
+        processor = CentreOfRotationCorrector.image_sharpness(
+            "centre",
+            backend="tigre",
+            tolerance=100,
+        )
         
         processor.set_input(self.sinogram)
         self.sinogram = processor.get_output()
@@ -58,22 +57,25 @@ class PolarisPipeline:
         ringRemove = RingRemover()
         ringRemove.set_input(self.sinogram)
         self.sino_rings = ringRemove.get_output()
+        
+        self.sino_rings.array = self.sino_rings.array.astype("float32")
+        self.sino_rings.geometry.dtype = 'float32'
         print("ring removal done")
 
     def paganin(self):
         paganin_processor = PaganinProcessor(delta = self.delta, beta = self.beta, energy = self.energy, full_retrieval= False)
         paganin_processor.set_input(self.sino_rings)
+
         self.sino_pag = paganin_processor.get_output()
+        self.sino_pag.array = self.sino_pag.array.astype("float32")
+        self.sino_pag.geometry.dtype = 'float32'
+
         print("paganin done")
 
     def reconstruct(self):
         if self.sino_pag is not None:
-            self.sino_pag.array = self.sino_pag.array.astype("float32")
-            self.sino_pag.geometry.dtype = 'float32'
             fdk =  FDK(self.sino_pag, self.ig)
         else:
-            self.sino_rings.array = self.sino_rings.array.astype("float32")
-            self.sino_rings.geometry.dtype = 'float32'
             fdk =  FDK(self.sino_rings, self.ig)
 
         self.reconstructed = fdk.run()

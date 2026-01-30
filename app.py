@@ -22,7 +22,7 @@ def polaris_data_loader(data_path):
         raise ValueError("Invalid path: expected a .scanlist file or a directory")
     
     # temp should be parsed later from the gradio interface
-    roi = {'angle': (None,None,10),
+    roi = {'angle': (None,None,5),
         'vertical': -1,
         'horizontal': -1,
         }
@@ -54,10 +54,10 @@ def run_reconstruction(scanlist_path, use_paganin, delta, beta, energy, preview)
     # Run pipeline
     pipeline = PolarisPipeline(data, delta, beta, energy)
     pipeline.get_sinogram()
-    # pipeline.correct_rotation()
-    # pipeline.ring_correction()
-    # if use_paganin:
-    #     pipeline.paganin()
+    pipeline.correct_rotation()
+    pipeline.ring_correction()
+    if use_paganin:
+        pipeline.paganin()
     pipeline.reconstruct()
 
     return pipeline.reconstructed

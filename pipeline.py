@@ -43,11 +43,13 @@ class PolarisPipeline:
 
         self.sinogram.reorder(order="tigre")
 
-        processor = CentreOfRotationCorrector.image_sharpness(
-            "centre",
-            backend="tigre",
-            tolerance=0.1,
-        )
+        # processor = CentreOfRotationCorrector.image_sharpness(
+        #     "centre",
+        #     backend="tigre",
+        #     tolerance=0.1,
+        # )
+        processor = CentreOfRotationCorrector.xcorrelation(ang_tol=10)
+        
         processor.set_input(self.sinogram)
         self.sinogram = processor.get_output()
         print("Centre of Rotation correction done")

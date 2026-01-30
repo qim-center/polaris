@@ -19,9 +19,14 @@ def polaris_data_loader(data_path):
 
     else:
         raise ValueError("Invalid path: expected a .scanlist file or a directory")
-
-    # for now, we mock updata
-    data = np.random.rand(10, 256, 256)
+    
+    # temp should be parsed later from the gradio interface
+    roi = {'angle': (None,None,10),
+        'vertical': -1,
+        'horizontal': -1,
+        }
+    
+    data = PolarisDataReader(data_directory, roi).read()
 
     return data
 
@@ -31,7 +36,7 @@ def load_data(scanlist_path, preview):
     
     if preview:
         # Here we get only the middle slice
-        data = data[0]
+        data = data.get_slice(vertical='centre')
 
     return data
 

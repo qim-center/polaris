@@ -1,10 +1,8 @@
 import json
 from pathlib import Path
 from cil.framework import AcquisitionGeometry, AcquisitionData
-from cil.processors import TransmissionAbsorptionConverter, Slicer, CentreOfRotationCorrector, PaganinProcessor, RingRemover
+from cil.processors import TransmissionAbsorptionConverter, CentreOfRotationCorrector, PaganinProcessor, RingRemover
 from cil.recon import FDK
-from cil.utilities.display import show2D, show_geometry
-from cil.utilities.jupyter import islicer, link_islicer
 
 class PolarisPipeline:
     def __init__(self, data, delta, beta, energy):
@@ -26,7 +24,7 @@ class PolarisPipeline:
         """
         Assumes input data is already normalised.
         """
-        self.ag = self.data.get_geometry()
+        self.ag = self.data.geometry
         self.sinogram = AcquisitionData(self.data, geometry=self.ag)
         self.ig = self.ag.get_ImageGeometry()
 

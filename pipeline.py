@@ -46,7 +46,7 @@ class PolarisPipeline:
         processor = CentreOfRotationCorrector.image_sharpness(
             "centre",
             backend="tigre",
-            tolerance=100,
+            tolerance=10,
         )
         
         processor.set_input(self.sinogram)

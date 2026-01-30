@@ -20,6 +20,10 @@ class PolarisPipeline:
         self.beta = beta
         self.energy = energy
 
+        print("Paganin parameters:")
+        print(f"Delta...: {self.delta}")
+        print(f"Beta....: {self.beta}")
+        print(f"Energy..: {self.energy}")
     def get_sinogram(self):
         """
         Assumes input data is already normalised.

@@ -68,8 +68,12 @@ class PolarisPipeline:
 
     def reconstruct(self):
         if self.sino_pag is not None:
+            self.sino_pag.array = self.sino_pag.array.astype("float32")
+            self.sino_pag.geometry.dtype = 'float32'
             fdk =  FDK(self.sino_pag, self.ig)
         else:
+            self.sino_rings.array = self.sino_rings.array.astype("float32")
+            self.sino_rings.geometry.dtype = 'float32'
             fdk =  FDK(self.sino_rings, self.ig)
 
         self.reconstructed = fdk.run()

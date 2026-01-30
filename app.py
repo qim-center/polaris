@@ -8,6 +8,48 @@ from pathlib import Path
 # Placeholder backend functions
 # -----------------------------
 
+
+def to_uint8_rgb(image):
+    """
+    Convert an arbitrary numeric numpy array into an 8-bit RGB image.
+
+    Accepts:
+        - 2D array (grayscale)
+        - 3D array with 3 channels (already RGB-like)
+
+    Returns:
+        uint8 RGB image with shape (H, W, 3)
+    """
+
+    img = np.asarray(image)
+
+    # Replace NaN / inf safely
+    img = np.nan_to_num(img, nan=0.0, posinf=0.0, neginf=0.0)
+
+    # Normalize to 0–255
+    img_min = img.min()
+    img_max = img.max()
+
+    if img_max > img_min:
+        img = (img - img_min) / (img_max - img_min)
+    else:
+        img = np.zeros_like(img, dtype=np.float32)
+
+    img = (img * 255).astype(np.uint8)
+
+    # Convert to RGB
+    if img.ndim == 2:
+        rgb = np.stack([img] * 3, axis=-1)
+
+    elif img.ndim == 3 and img.shape[-1] == 3:
+        rgb = img
+
+    else:
+        raise ValueError(f"Unsupported shape for RGB conversion: {img.shape}")
+
+    return rgb
+
+
 def polaris_data_loader(data_path):
 
     path = Path(data_path)
@@ -70,8 +112,10 @@ def run_reconstruction(scanlist_path, use_paganin, delta, beta, energy, preview)
     else:
         raise ValueError(f"Unsupported number of dimensions: {image.ndim}")
 
+    # Set image preview to RGB
+    rgb_image = to_uint8_rgb(middle_slice)
 
-    return middle_slice
+    return rgb_image
 
 def run_preview(*args):
     data = run_reconstruction(*args, preview=True)
